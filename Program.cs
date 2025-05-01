@@ -68,14 +68,21 @@ class Program
             }
         }
 
-        File.WriteAllText(outputFilePath, json.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        var newJson = $"{json.ToJsonString(new JsonSerializerOptions { WriteIndented = true })}\n";
+        File.WriteAllText(outputFilePath, newJson);
     }
     static void ProcessFiles(JsonNode componentNode, string component)
     {
-        if (componentNode == null) return; var files = componentNode["files"]; if (files == null) return; string version = componentNode["version"]?.ToString() ?? ""; foreach (var file in files.AsArray())
+        if (componentNode == null) return;
+        var files = componentNode["files"];
+        if (files == null) return;
+        string version = componentNode["version"]?.ToString() ?? "";
+
+        foreach (var file in files.AsArray())
         {
             if (file == null) continue;
             string url = file["url"]?.ToString() ?? "";
+            if (url == "" || !url.StartsWith("https://download.visualstudio")) continue;
             string fileName = Path.GetFileName(url);
 
             string newUrl = $"https://builds.dotnet.microsoft.com/dotnet/{component}/{version}/{fileName}";
